@@ -206,22 +206,31 @@ export default function Campaigns({ session }) {
                       </div>
                     )}
 
-                    {!isCompany && campaign.status === 'open' && (
-                      <button
-                        onClick={() => handleApply(campaign.id)}
-                        disabled={alreadyApplied || applyingId === campaign.id}
-                        className={`px-4 py-2 rounded-lg font-medium text-sm transition ${
-                          alreadyApplied
-                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                        }`}
+                    {isCompany ? (
+                      <Link
+                        to={`/campaigns/${campaign.id}`}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition"
                       >
-                        {alreadyApplied
-                          ? 'Applied'
-                          : applyingId === campaign.id
-                          ? 'Applying...'
-                          : 'Apply Now'}
-                      </button>
+                        View Applications
+                      </Link>
+                    ) : (
+                      campaign.status === 'open' && (
+                        <button
+                          onClick={() => handleApply(campaign.id)}
+                          disabled={alreadyApplied || applyingId === campaign.id}
+                          className={`px-4 py-2 rounded-lg font-medium text-sm transition ${
+                            alreadyApplied
+                              ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                              : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                          }`}
+                        >
+                          {alreadyApplied
+                            ? 'Applied'
+                            : applyingId === campaign.id
+                            ? 'Applying...'
+                            : 'Apply Now'}
+                        </button>
+                      )
                     )}
                   </div>
                 </div>
