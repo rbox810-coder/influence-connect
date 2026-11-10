@@ -83,6 +83,8 @@ export default function Deals({ session }) {
                 deal.company?.full_name ||
                 'Company'
 
+            const otherUserId = isCompany ? deal.influencer_id : deal.company_id
+
             return (
               <div
                 key={deal.id}
@@ -112,6 +114,13 @@ export default function Deals({ session }) {
                     <p className="text-xs text-gray-400 mt-2">
                       Created: {new Date(deal.created_at).toLocaleDateString()}
                     </p>
+
+                    <Link
+                      to={`/messages?user=${otherUserId}`}
+                      className="inline-block mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                      Message {isCompany ? 'Influencer' : 'Company'} →
+                    </Link>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4 min-w-[200px]">
