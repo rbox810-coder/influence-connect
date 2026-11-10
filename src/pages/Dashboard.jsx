@@ -5,10 +5,11 @@ import { supabase } from '../lib/supabase'
 export default function Dashboard({ session }) {
   const [profile, setProfile] = useState(null)
   const [extraProfile, setExtraProfile] = useState(null)
+  const [stats, setStats] = useState({ campaigns: 0, applications: 0, deals: 0 })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function getProfile() {
+    async function load() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -23,7 +24,7 @@ export default function Dashboard({ session }) {
 
       setProfile(data)
 
-      // Load role-specific data
+      // Load role-specific profile
       if (data.role === 'influencer') {
         const { data: inf } = await supabase
           .from('influencer_profiles')
@@ -31,6 +32,23 @@ export default function Dashboard({ session }) {
           .eq('id', session.user.id)
           .single()
         setExtraProfile(inf)
+
+        // Stats for influencer
+        const { count: appsCount } = await supabase
+          .from('applications')
+          .select('*', { count: 'exact', head: true })
+          .eq('influencer_id', session.user.id)
+
+        const { count: dealsCount } = await supabase
+          .from('deals')
+          .select('*', { count: 'exact', head: true })
+          .eq('influencer_id', session.user.id)
+
+        setStats({
+          campaigns: 0,
+          applications: appsCount || 0,
+          deals: dealsCount || 0,
+        })
       } else {
         const { data: comp } = await supabase
           .from('company_profiles')
@@ -38,12 +56,29 @@ export default function Dashboard({ session }) {
           .eq('id', session.user.id)
           .single()
         setExtraProfile(comp)
+
+        // Stats for company
+        const { count: campsCount } = await supabase
+          .from('campaigns')
+          .select('*', { count: 'exact', head: true })
+          .eq('company_id', session.user.id)
+
+        const { count: dealsCount } = await supabase
+          .from('deals')
+          .select('*', { count: 'exact', head: true })
+          .eq('company_id', session.user.id)
+
+        setStats({
+          campaigns: campsCount || 0,
+          applications: 0,
+          deals: dealsCount || 0,
+        })
       }
 
       setLoading(false)
     }
 
-    getProfile()
+    load()
   }, [session])
 
   if (loading) {
@@ -56,7 +91,6 @@ export default function Dashboard({ session }) {
 
   const isInfluencer = profile?.role === 'influencer'
 
-  // Simple profile completion check
   const isProfileComplete = isInfluencer
     ? extraProfile?.bio && (extraProfile?.instagram_url || extraProfile?.tiktok_url)
     : extraProfile?.company_name && extraProfile?.description
@@ -78,6 +112,45 @@ export default function Dashboard({ session }) {
         >
           Edit Profile
         </Link>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        {isInfluencer ? (
+          <>
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="text-sm text-gray-500">Applications Sent</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{stats.applications}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="text-sm text-gray-500">Active Deals</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{stats.deals}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="text-sm text-gray-500">Profile Status</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {isProfileComplete ? 'Complete' : 'Incomplete'}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="text-sm text-gray-500">Campaigns Created</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{stats.campaigns}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="text-sm text-gray-500">Active Deals</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{stats.deals}</p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-100 p-5">
+              <p className="text-sm text-gray-500">Profile Status</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {isProfileComplete ? 'Complete' : 'Incomplete'}
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {!isProfileComplete && (
@@ -150,12 +223,20 @@ export default function Dashboard({ session }) {
             </Link>
 
             {isInfluencer ? (
-              <Link
-                to="/campaigns"
-                className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-medium transition"
-              >
-                Browse Campaigns
-              </Link>
+              <>
+                <Link
+                  to="/campaigns"
+                  className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-medium transition"
+                >
+                  Browse Campaigns
+                </Link>
+                <Link
+                  to="/deals"
+                  className="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-lg font-medium transition"
+                >
+                  My Deals
+                </Link>
+              </>
             ) : (
               <>
                 <Link
@@ -170,14 +251,14 @@ export default function Dashboard({ session }) {
                 >
                   My Campaigns
                 </Link>
+                <Link
+                  to="/deals"
+                  className="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-lg font-medium transition"
+                >
+                  My Deals
+                </Link>
               </>
             )}
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-500">
-              Next: Messaging, Deal acceptance, and 5% commission tracking.
-            </p>
           </div>
         </div>
       </div>
