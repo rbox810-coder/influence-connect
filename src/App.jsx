@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
+import Profile from './pages/Profile'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -40,6 +41,7 @@ function App() {
         <Route path="/login" element={!session ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/signup" element={!session ? <Signup /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={session ? <Dashboard session={session} /> : <Navigate to="/login" />} />
+        <Route path="/profile" element={session ? <Profile session={session} /> : <Navigate to="/login" />} />
       </Routes>
     </div>
   )
