@@ -33,6 +33,12 @@ export default function Navbar({ session }) {
                   Campaigns
                 </Link>
                 <Link
+                  to="/deals"
+                  className="text-gray-700 hover:text-indigo-600 font-medium"
+                >
+                  Deals
+                </Link>
+                <Link
                   to="/profile"
                   className="text-gray-700 hover:text-indigo-600 font-medium"
                 >
