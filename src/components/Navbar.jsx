@@ -27,6 +27,12 @@ export default function Navbar({ session }) {
                   Dashboard
                 </Link>
                 <Link
+                  to="/campaigns"
+                  className="text-gray-700 hover:text-indigo-600 font-medium"
+                >
+                  Campaigns
+                </Link>
+                <Link
                   to="/profile"
                   className="text-gray-700 hover:text-indigo-600 font-medium"
                 >
