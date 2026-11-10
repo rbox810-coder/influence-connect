@@ -283,24 +283,32 @@ export default function CampaignDetail({ session }) {
                         </div>
                       </div>
 
-                      {app.status === 'pending' && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleAccept(app)}
-                            disabled={actionLoading === app.id}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
-                          >
-                            {actionLoading === app.id ? 'Processing...' : 'Accept'}
-                          </button>
-                          <button
-                            onClick={() => handleReject(app.id)}
-                            disabled={actionLoading === app.id}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition disabled:opacity-50"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      )}
+                      <div className="flex flex-col gap-2">
+                        {app.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleAccept(app)}
+                              disabled={actionLoading === app.id}
+                              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
+                            >
+                              {actionLoading === app.id ? 'Processing...' : 'Accept'}
+                            </button>
+                            <button
+                              onClick={() => handleReject(app.id)}
+                              disabled={actionLoading === app.id}
+                              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition disabled:opacity-50"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        )}
+                        <Link
+                          to={`/messages?user=${app.influencer_id}`}
+                          className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium rounded-lg transition text-center"
+                        >
+                          Message
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )
