@@ -116,7 +116,7 @@ export default function Dashboard({ session }) {
                     <p>TikTok: {extraProfile.tiktok_followers?.toLocaleString() || 0} followers</p>
                   )}
                   {extraProfile?.facebook_url && (
-                    <p>Facebook: {extraProfile.facebook_followers?.toLocaleStringString() || 0} followers</p>
+                    <p>Facebook: {extraProfile.facebook_followers?.toLocaleString() || 0} followers</p>
                   )}
                   {extraProfile?.linkedin_url && (
                     <p>LinkedIn: {extraProfile.linkedin_followers?.toLocaleString() || 0} followers</p>
