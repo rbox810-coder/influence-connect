@@ -150,25 +150,33 @@ export default function Dashboard({ session }) {
             </Link>
 
             {isInfluencer ? (
-              <button
-                disabled
-                className="block w-full text-center bg-gray-100 text-gray-400 py-2.5 rounded-lg font-medium cursor-not-allowed"
+              <Link
+                to="/campaigns"
+                className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-medium transition"
               >
-                Browse Campaigns (Coming Soon)
-              </button>
+                Browse Campaigns
+              </Link>
             ) : (
-              <button
-                disabled
-                className="block w-full text-center bg-gray-100 text-gray-400 py-2.5 rounded-lg font-medium cursor-not-allowed"
-              >
-                Create Campaign (Coming Soon)
-              </button>
+              <>
+                <Link
+                  to="/campaigns/create"
+                  className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg font-medium transition"
+                >
+                  Create Campaign
+                </Link>
+                <Link
+                  to="/campaigns"
+                  className="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-lg font-medium transition"
+                >
+                  My Campaigns
+                </Link>
+              </>
             )}
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-100">
             <p className="text-xs text-gray-500">
-              Next phases will add campaigns, applications, messaging, and the 5% commission system.
+              Next: Messaging, Deal acceptance, and 5% commission tracking.
             </p>
           </div>
         </div>
