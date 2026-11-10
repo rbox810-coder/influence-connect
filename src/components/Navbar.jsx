@@ -39,6 +39,12 @@ export default function Navbar({ session }) {
                   Deals
                 </Link>
                 <Link
+                  to="/messages"
+                  className="text-gray-700 hover:text-indigo-600 font-medium"
+                >
+                  Messages
+                </Link>
+                <Link
                   to="/profile"
                   className="text-gray-700 hover:text-indigo-600 font-medium"
                 >
