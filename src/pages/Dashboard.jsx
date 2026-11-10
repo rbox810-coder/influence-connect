@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Dashboard({ session }) {
   const [profile, setProfile] = useState(null)
+  const [extraProfile, setExtraProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -15,9 +17,29 @@ export default function Dashboard({ session }) {
 
       if (error) {
         console.error(error)
-      } else {
-        setProfile(data)
+        setLoading(false)
+        return
       }
+
+      setProfile(data)
+
+      // Load role-specific data
+      if (data.role === 'influencer') {
+        const { data: inf } = await supabase
+          .from('influencer_profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        setExtraProfile(inf)
+      } else {
+        const { data: comp } = await supabase
+          .from('company_profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        setExtraProfile(comp)
+      }
+
       setLoading(false)
     }
 
@@ -32,39 +54,122 @@ export default function Dashboard({ session }) {
     )
   }
 
+  const isInfluencer = profile?.role === 'influencer'
+
+  // Simple profile completion check
+  const isProfileComplete = isInfluencer
+    ? extraProfile?.bio && (extraProfile?.instagram_url || extraProfile?.tiktok_url)
+    : extraProfile?.company_name && extraProfile?.description
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Welcome, {profile?.full_name || 'User'}!
-        </h1>
-        <p className="mt-2 text-gray-600">
-          You are logged in as a <span className="font-semibold capitalize">{profile?.role}</span>.
-        </p>
-
-        <div className="mt-8 p-4 bg-indigo-50 rounded-lg">
-          <p className="text-indigo-800">
-            {profile?.role === 'influencer'
-              ? 'Next step: Complete your influencer profile (platforms, followers, rates) so brands can find you.'
-              : 'Next step: Create your first campaign to start receiving applications from influencers.'}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Welcome, {profile?.full_name || 'User'}!
+          </h1>
+          <p className="mt-1 text-gray-600">
+            You are logged in as a <span className="font-semibold capitalize">{profile?.role}</span>
           </p>
         </div>
+        <Link
+          to="/profile"
+          className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium transition"
+        >
+          Edit Profile
+        </Link>
+      </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="border border-gray-200 rounded-lg p-6">
-            <h3 className="font-semibold text-gray-900">Your Profile</h3>
-            <p className="mt-2 text-sm text-gray-600">Email: {profile?.email}</p>
-            <p className="text-sm text-gray-600">Role: {profile?.role}</p>
+      {!isProfileComplete && (
+        <div className="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-amber-800 font-medium">Your profile is incomplete</p>
+          <p className="text-amber-700 text-sm mt-1">
+            {isInfluencer
+              ? 'Add your bio and at least one social platform so brands can find you.'
+              : 'Add your company name and description so influencers know who you are.'}
+          </p>
+          <Link to="/profile" className="inline-block mt-3 text-sm font-medium text-amber-800 underline">
+            Complete your profile →
+          </Link>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Profile Summary */}
+        <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Summary</h2>
+
+          {isInfluencer ? (
+            <div className="space-y-3 text-sm">
+              <p><span className="text-gray-500">Bio:</span> {extraProfile?.bio || 'Not set'}</p>
+              <p><span className="text-gray-500">Location:</span> {extraProfile?.location || 'Not set'}</p>
+              <p><span className="text-gray-500">Niches:</span> {(extraProfile?.niche || []).join(', ') || 'Not set'}</p>
+              <p><span className="text-gray-500">Rate per post:</span> {extraProfile?.rate_per_post ? `$${extraProfile.rate_per_post}` : 'Not set'}</p>
+
+              <div className="pt-3 border-t border-gray-100">
+                <p className="font-medium text-gray-700 mb-2">Platforms</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {extraProfile?.instagram_url && (
+                    <p>Instagram: {extraProfile.instagram_followers?.toLocaleString() || 0} followers</p>
+                  )}
+                  {extraProfile?.tiktok_url && (
+                    <p>TikTok: {extraProfile.tiktok_followers?.toLocaleString() || 0} followers</p>
+                  )}
+                  {extraProfile?.facebook_url && (
+                    <p>Facebook: {extraProfile.facebook_followers?.toLocaleStringString() || 0} followers</p>
+                  )}
+                  {extraProfile?.linkedin_url && (
+                    <p>LinkedIn: {extraProfile.linkedin_followers?.toLocaleString() || 0} followers</p>
+                  )}
+                  {!extraProfile?.instagram_url && !extraProfile?.tiktok_url && !extraProfile?.facebook_url && !extraProfile?.linkedin_url && (
+                    <p className="text-gray-500">No platforms added yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 text-sm">
+              <p><span className="text-gray-500">Company:</span> {extraProfile?.company_name || 'Not set'}</p>
+              <p><span className="text-gray-500">Industry:</span> {extraProfile?.industry || 'Not set'}</p>
+              <p><span className="text-gray-500">Website:</span> {extraProfile?.website || 'Not set'}</p>
+              <p><span className="text-gray-500">Location:</span> {extraProfile?.location || 'Not set'}</p>
+              <p><span className="text-gray-500">Description:</span> {extraProfile?.description || 'Not set'}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+            <Link
+              to="/profile"
+              className="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-2.5 rounded-lg font-medium transition"
+            >
+              Edit Profile
+            </Link>
+
+            {isInfluencer ? (
+              <button
+                disabled
+                className="block w-full text-center bg-gray-100 text-gray-400 py-2.5 rounded-lg font-medium cursor-not-allowed"
+              >
+                Browse Campaigns (Coming Soon)
+              </button>
+            ) : (
+              <button
+                disabled
+                className="block w-full text-center bg-gray-100 text-gray-400 py-2.5 rounded-lg font-medium cursor-not-allowed"
+              >
+                Create Campaign (Coming Soon)
+              </button>
+            )}
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-6">
-            <h3 className="font-semibold text-gray-900">Coming Soon</h3>
-            <ul className="mt-2 text-sm text-gray-600 space-y-1">
-              <li>• Complete profile</li>
-              <li>• Browse / Create campaigns</li>
-              <li>• Messaging</li>
-              <li>• Deals & 5% commission tracking</li>
-            </ul>
+          <div className="mt-6 pt-6 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
+              Next phases will add campaigns, applications, messaging, and the 5% commission system.
+            </p>
           </div>
         </div>
       </div>
