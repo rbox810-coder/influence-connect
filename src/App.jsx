@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import Campaigns from './pages/Campaigns'
 import CreateCampaign from './pages/CreateCampaign'
+import CampaignDetail from './pages/CampaignDetail'
 
 function App() {
   const [session, setSession] = useState(null)
@@ -46,6 +47,7 @@ function App() {
         <Route path="/profile" element={session ? <Profile session={session} /> : <Navigate to="/login" />} />
         <Route path="/campaigns" element={session ? <Campaigns session={session} /> : <Navigate to="/login" />} />
         <Route path="/campaigns/create" element={session ? <CreateCampaign session={session} /> : <Navigate to="/login" />} />
+        <Route path="/campaigns/:id" element={session ? <CampaignDetail session={session} /> : <Navigate to="/login" />} />
       </Routes>
     </div>
   )
